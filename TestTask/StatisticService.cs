@@ -45,10 +45,12 @@ public class StatisticService
             var c = await stream.ReadNextChar();
             var str = c.ToString();
 
-            if (c is '\n' or '\r' or ' ' or '\0')
+            if (c == (char) 65533)
             {
                 continue;
             }
+            
+            if (ValidateChar(c)) continue;
 
             var index = stats.FindIndex(s => s.Letter == str);
 
@@ -76,18 +78,64 @@ public class StatisticService
     /// </summary>
     /// <param name="stream">Стрим для считывания символов для последующего анализа</param>
     /// <returns>Коллекция статистик по каждой букве, что была прочитана из стрима.</returns>
-    private async Task<IList<LetterStats>> FillDoubleLetterStats(IReadOnlyStream stream)
+    public async Task<IList<LetterStats>> FillDoubleLetterStats(IReadOnlyStream stream)
     {
+        var stats = new List<LetterStats>();
+        var box = string.Empty;
+        
         stream.ResetPositionToStart();
         while (!stream.IsEof)
         {
-            char c = await stream.ReadNextChar();
-            // TODO : заполнять статистику с использованием метода IncStatistic. Учёт букв - НЕ регистрозависимый.
+            var c = await stream.ReadNextChar();
+
+            if (c == (char) 65533)
+            {
+                continue;
+            }
+            
+            if (ValidateChar(c))
+            {
+                box = string.Empty;
+                continue;
+            }
+
+            box += c.ToString().ToLower();
+            if (box.Length <= 1)
+            {
+                continue;
+            }
+            
+            var index = stats.FindIndex(s => s.Letter == box);
+
+            if (index == -1)
+            {
+                var newStat = IncStatistic(new LetterStats
+                {
+                    Letter = box
+                });
+                stats.Add(newStat);
+                
+                box = string.Empty;
+                continue;
+            }
+            
+            var stat = IncStatistic(stats[index]);
+            stats[index] = stat;
+            
+            box = string.Empty;
         }
 
-        //return ???;
+        return stats;
+    }
 
-        throw new NotImplementedException();
+    private static bool ValidateChar(char c)
+    {
+        if (c is '\n' or '\r' or ' ' or '\0')
+        {
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>

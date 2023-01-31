@@ -3,6 +3,7 @@ namespace TestTask.Tests;
 public class StatisticServiceTests
 {
     private const string FILE_NAME = "Text.txt";
+    private const string FILE_NAME_DOUBLE = "TextDouble.txt";
 
     [Fact]
     public async Task FillSingleLetterStatsCheckForDesiredBehavior()
@@ -12,10 +13,22 @@ public class StatisticServiceTests
         var stats = await service.FillSingleLetterStats(inputStream); 
         inputStream.Close();
         
-        var testStats = GetStatsList();
+        var testStats = GetStatsSingleLetterList();
         Assert.Equal(testStats, stats);
     }
 
+    [Fact]
+    public async Task FillDoubleLetterStatsCheckForDesiredBehavior()
+    {
+        var service = new StatisticService();
+        var inputStream = new ReadOnlyStream(FILE_NAME_DOUBLE);
+        var stats = await service.FillDoubleLetterStats(inputStream); 
+        inputStream.Close();
+        
+        var testStats = GetStatsDoubleLetterList();
+        Assert.Equal(testStats, stats);
+    }
+    
     [Fact]
     public void File_Exists_ReturnsTrue_ForExistingFile()
     {
@@ -26,10 +39,11 @@ public class StatisticServiceTests
         Assert.True(result);
     }
     
-    private IList<LetterStats> GetStatsList()
+    private IList<LetterStats> GetStatsSingleLetterList()
     {
         var stats = new List<LetterStats>();
 
+        //А - Я
         for (var c = 'А'; c <= 'Я'; c++)
         {
             stats.Add(new LetterStats()
@@ -39,6 +53,7 @@ public class StatisticServiceTests
             });
         }
 
+        //а - е
         for (var c = 'а'; c <= 'е'; c++)
         {
             stats.Add(new LetterStats()
@@ -48,31 +63,42 @@ public class StatisticServiceTests
             });
         }
         
-        stats[0] = new LetterStats()
+        //а - д
+        for (var i = 0; i < 5; i++)
         {
-            Letter = "А",
-            Count = 2
-        };
-        stats[1] = new LetterStats()
+            stats[i] = new LetterStats()
+            {
+                Letter = ((char)('А' + i)).ToString(),
+                Count = 2
+            };
+        }
+        
+        return stats;
+    }
+    
+    private IList<LetterStats> GetStatsDoubleLetterList()
+    {
+        var stats = new List<LetterStats>();
+
+        //аа - цц
+        for (var c = 'а'; c <= 'ц'; c++)
         {
-            Letter = "Б",
-            Count = 2
-        };
-        stats[2] = new LetterStats()
+            stats.Add(new LetterStats()
+            {
+                Letter = c.ToString() + c.ToString(),
+                Count = 1
+            });
+        }
+
+        //аа - ее
+        for (var i = 0; i <= 5; i++)
         {
-            Letter = "В",
-            Count = 2
-        };
-        stats[3] = new LetterStats()
-        {
-            Letter = "Г",
-            Count = 2
-        };
-        stats[4] = new LetterStats()
-        {
-            Letter = "Д",
-            Count = 2
-        };
+            stats[i] = new LetterStats()
+            {
+                Letter = ((char)('а' + i)).ToString() + ((char)('а' + i)).ToString(),
+                Count = 2
+            };
+        }
         
         return stats;
     }

@@ -44,7 +44,7 @@
             if (charCount == 1)
             {
                 position++;
-                return buffer[0] == 65533 ? ' ' : buffer[0];
+                return buffer[0] == 65533 ? (char)65533 : buffer[0];
             }
 
             if (IsEof)
