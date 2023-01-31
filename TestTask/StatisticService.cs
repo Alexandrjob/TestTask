@@ -37,16 +37,36 @@ public class StatisticService
     /// <returns>Коллекция статистик по каждой букве, что была прочитана из стрима.</returns>
     private async Task<IList<LetterStats>> FillSingleLetterStats(IReadOnlyStream stream)
     {
+        var stats = new List<LetterStats>();
+
         stream.ResetPositionToStart();
         while (!stream.IsEof)
         {
             var c = await stream.ReadNextChar();
-            // TODO : заполнять статистику с использованием метода IncStatistic. Учёт букв - регистрозависимый.
+            var str = c.ToString();
+
+            if (c is '\n' or '\r' or ' ' or '\0')
+            {
+                continue;
+            }
+
+            var index = stats.FindIndex(s => s.Letter == str);
+
+            if (index == -1)
+            {
+                var newStat = IncStatistic(new LetterStats
+                {
+                    Letter = str
+                });
+                stats.Add(newStat);
+                continue;
+            }
+
+            var stat = IncStatistic(stats[index]);
+            stats[index] = stat;
         }
 
-        //return ???;
-
-        throw new NotImplementedException();
+        return stats;
     }
 
     /// <summary>
@@ -106,8 +126,9 @@ public class StatisticService
     /// Метод увеличивает счётчик вхождений по переданной структуре.
     /// </summary>
     /// <param name="letterStats"></param>
-    private void IncStatistic(LetterStats letterStats)
+    private LetterStats IncStatistic(LetterStats letterStats)
     {
         letterStats.Count++;
+        return letterStats;
     }
 }
