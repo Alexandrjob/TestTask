@@ -35,7 +35,7 @@ public class StatisticService
     /// </summary>
     /// <param name="stream">Стрим для считывания символов для последующего анализа</param>
     /// <returns>Коллекция статистик по каждой букве, что была прочитана из стрима.</returns>
-    private async Task<IList<LetterStats>> FillSingleLetterStats(IReadOnlyStream stream)
+    public async Task<IList<LetterStats>> FillSingleLetterStats(IReadOnlyStream stream)
     {
         var stats = new List<LetterStats>();
 
