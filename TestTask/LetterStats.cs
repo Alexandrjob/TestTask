@@ -3,7 +3,7 @@
     /// <summary>
     /// Статистика вхождения буквы/пары букв
     /// </summary>
-    public struct LetterStats
+    public struct LetterStats : IComparable<LetterStats>
     {
         /// <summary>
         /// Буква/Пара букв для учёта статистики.
@@ -18,6 +18,11 @@
         public bool Equals(LetterStats other)
         {
             return Letter == other.Letter;
+        }
+
+        public int CompareTo(LetterStats other)
+        {
+            return Letter.CompareTo(other.Letter);
         }
     }
 }

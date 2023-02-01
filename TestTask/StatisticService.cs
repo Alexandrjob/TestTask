@@ -2,10 +2,13 @@
 
 public class StatisticService
 {
+    private const string FILE_NAME_SINGLE = "TextSingle.txt";
+    private const string FILE_NAME_DOUBLE = "TextDouble.txt";
+
     public async Task Start(string[] args)
     {
-        IReadOnlyStream inputStream1 = GetInputStream(args[0]);
-        IReadOnlyStream inputStream2 = GetInputStream(args[1]);
+        IReadOnlyStream inputStream1 = GetInputStream(FILE_NAME_SINGLE);
+        IReadOnlyStream inputStream2 = GetInputStream(FILE_NAME_DOUBLE);
 
         IList<LetterStats> singleLetterStats = await FillSingleLetterStats(inputStream1);
         IList<LetterStats> doubleLetterStats = await FillDoubleLetterStats(inputStream2);
@@ -147,33 +150,32 @@ public class StatisticService
     /// <param name="charType">Тип букв для анализа</param>
     public IList<LetterStats> RemoveCharStatsByType(IList<LetterStats> letters, CharType charType)
     {
-        // TODO : Удалить статистику по запрошенному типу букв.
         switch (charType)
         {
             case CharType.Consonants:
-                const string vowels = "аеёиоуыэюя";
-                return RemoveLetters(letters, vowels, true);
-            
-            case CharType.Vowel:
-                
                 const string consonants = "бвгджзйклмнпрстфхцчшщьъ";
-                return RemoveLetters(letters, consonants, false);
+                return RemoveLetters(letters, consonants);
+
+            case CharType.Vowel:
+                const string vowels = "аеёиоуыэюя";
+                return RemoveLetters(letters, vowels);
         }
 
         return new List<LetterStats>();
     }
 
-    private IList<LetterStats> RemoveLetters(IList<LetterStats> letters, string lettersDelete, bool removeIfContained)
+    private IList<LetterStats> RemoveLetters(IList<LetterStats> letters, string lettersDelete)
     {
         for (var i = letters.Count - 1; i >= 0; i--)
         {
             var letter = letters[i].Letter.ToLower();
-            
+
             if (letter.Length > 1)
             {
                 letter = letter.Substring(1);
             }
-            if (lettersDelete.Contains(letter) == removeIfContained)
+
+            if (lettersDelete.Contains(letter))
             {
                 letters.RemoveAt(i);
             }
@@ -191,8 +193,15 @@ public class StatisticService
     /// <param name="letters">Коллекция со статистикой</param>
     private void PrintStatistic(IEnumerable<LetterStats> letters)
     {
-        // TODO : Выводить на экран статистику. Выводить предварительно отсортировав по алфавиту!
-        throw new NotImplementedException();
+        var list = letters.ToList();
+        list.Sort();
+
+        foreach (var stat in list)
+        {
+            Console.WriteLine("{0} : {1}", stat.Letter, stat.Count);
+        }
+
+        Console.WriteLine(list.Count);
     }
 
     /// <summary>
