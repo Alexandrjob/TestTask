@@ -2,13 +2,10 @@
 
 public class StatisticService
 {
-    private const string FILE_NAME_SINGLE = "TextSingle.txt";
-    private const string FILE_NAME_DOUBLE = "TextDouble.txt";
-
     public async Task Start(string[] args)
     {
-        IReadOnlyStream inputStream1 = GetInputStream(FILE_NAME_SINGLE);
-        IReadOnlyStream inputStream2 = GetInputStream(FILE_NAME_DOUBLE);
+        IReadOnlyStream inputStream1 = GetInputStream(args[0]);
+        IReadOnlyStream inputStream2 = GetInputStream(args[1]);
 
         IList<LetterStats> singleLetterStats = await FillSingleLetterStats(inputStream1);
         IList<LetterStats> doubleLetterStats = await FillDoubleLetterStats(inputStream2);
