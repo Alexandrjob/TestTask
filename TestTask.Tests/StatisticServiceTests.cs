@@ -2,17 +2,20 @@ namespace TestTask.Tests;
 
 public class StatisticServiceTests
 {
-    private const string FILE_NAME = "Text.txt";
+    private const string FILE_NAME_SINGLE = "TextSingle.txt";
     private const string FILE_NAME_DOUBLE = "TextDouble.txt";
-
+    
+    private const string VOWELS = "аеёиоуыэюя";
+    private const string CONSONANTS = "бвгджзйклмнпрстфхцчшщьъ";
+    
     [Fact]
     public async Task FillSingleLetterStatsCheckForDesiredBehavior()
     {
         var service = new StatisticService();
-        var inputStream = new ReadOnlyStream(FILE_NAME);
-        var stats = await service.FillSingleLetterStats(inputStream); 
+        var inputStream = new ReadOnlyStream(FILE_NAME_SINGLE);
+        var stats = await service.FillSingleLetterStats(inputStream);
         inputStream.Close();
-        
+
         var testStats = GetStatsSingleLetterList();
         Assert.Equal(testStats, stats);
     }
@@ -22,10 +25,62 @@ public class StatisticServiceTests
     {
         var service = new StatisticService();
         var inputStream = new ReadOnlyStream(FILE_NAME_DOUBLE);
-        var stats = await service.FillDoubleLetterStats(inputStream); 
+        var stats = await service.FillDoubleLetterStats(inputStream);
         inputStream.Close();
-        
+
         var testStats = GetStatsDoubleLetterList();
+        Assert.Equal(testStats, stats);
+    }
+
+    [Fact]
+    public async Task RemoveSingleLettersVowels()
+    {
+        var service = new StatisticService();
+        var inputStream = new ReadOnlyStream(FILE_NAME_SINGLE);
+        var result = await service.FillSingleLetterStats(inputStream);
+
+        var stats = service.RemoveCharStatsByType(result, CharType.Vowel);
+
+        var testStats = GetSingleLettersWithout(VOWELS, true);
+        Assert.Equal(testStats, stats);
+    }
+
+    [Fact]
+    public async Task RemoveSingleLettersConsonants()
+    {
+        var service = new StatisticService();
+        var inputStream = new ReadOnlyStream(FILE_NAME_SINGLE);
+        var result = await service.FillSingleLetterStats(inputStream);
+
+        var stats = service.RemoveCharStatsByType(result, CharType.Consonants);
+
+        var testStats = GetSingleLettersWithout(CONSONANTS, false);
+        Assert.Equal(testStats, stats);
+    }
+
+    [Fact]
+    public async Task RemoveDoubleLettersVowels()
+    {
+        var service = new StatisticService();
+        var inputStream = new ReadOnlyStream(FILE_NAME_DOUBLE);
+        var result = await service.FillDoubleLetterStats(inputStream);
+
+        var stats = service.RemoveCharStatsByType(result, CharType.Vowel);
+
+        var testStats = GetDoubleLettersWithout(VOWELS, true);
+        Assert.Equal(testStats, stats);
+    }
+    
+    [Fact]
+    public async Task RemoveDoubleLettersConsonants()
+    {
+        var service = new StatisticService();
+        var inputStream = new ReadOnlyStream(FILE_NAME_DOUBLE);
+        var result = await service.FillDoubleLetterStats(inputStream);
+
+        var stats = service.RemoveCharStatsByType(result, CharType.Vowel);
+
+        var testStats = GetDoubleLettersWithout(CONSONANTS, false);
         Assert.Equal(testStats, stats);
     }
     
@@ -33,12 +88,12 @@ public class StatisticServiceTests
     public void File_Exists_ReturnsTrue_ForExistingFile()
     {
         // Act
-        var result = File.Exists(FILE_NAME);
+        var result = File.Exists(FILE_NAME_SINGLE);
 
         // Assert
         Assert.True(result);
     }
-    
+
     private IList<LetterStats> GetStatsSingleLetterList()
     {
         var stats = new List<LetterStats>();
@@ -62,20 +117,20 @@ public class StatisticServiceTests
                 Count = 1
             });
         }
-        
+
         //а - д
         for (var i = 0; i < 5; i++)
         {
             stats[i] = new LetterStats()
             {
-                Letter = ((char)('А' + i)).ToString(),
+                Letter = ((char) ('А' + i)).ToString(),
                 Count = 2
             };
         }
-        
+
         return stats;
     }
-    
+
     private IList<LetterStats> GetStatsDoubleLetterList()
     {
         var stats = new List<LetterStats>();
@@ -95,11 +150,50 @@ public class StatisticServiceTests
         {
             stats[i] = new LetterStats()
             {
-                Letter = ((char)('а' + i)).ToString() + ((char)('а' + i)).ToString(),
+                Letter = ((char) ('а' + i)).ToString() + ((char) ('а' + i)).ToString(),
                 Count = 2
             };
         }
-        
+
         return stats;
+    }
+
+    private List<LetterStats> GetSingleLettersWithout(string lettersDelete, bool removeIfContained)
+    {
+        var stats = GetStatsSingleLetterList();
+
+        var newStats = new List<LetterStats>();
+        foreach (var stat in stats)
+        {
+            if (!lettersDelete.Contains(stat.Letter.ToLower()) == removeIfContained)
+            {
+                newStats.Add(stat);
+            }
+        }
+
+        return newStats;
+    }
+
+    private List<LetterStats> GetDoubleLettersWithout(string lettersDelete, bool removeIfContained)
+    {
+        var stats = GetStatsDoubleLetterList();
+
+        var newStats = new List<LetterStats>();
+        foreach (var stat in stats)
+        {
+            var letter = stat.Letter.ToLower();
+
+            if (letter.Length > 1)
+            {
+                letter = letter.Substring(1);
+            }
+
+            if (!lettersDelete.Contains(letter) == removeIfContained)
+            {
+                newStats.Add(stat);
+            }
+        }
+
+        return newStats;
     }
 }

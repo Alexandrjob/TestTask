@@ -49,7 +49,7 @@ public class StatisticService
             {
                 continue;
             }
-            
+
             if (ValidateChar(c)) continue;
 
             var index = stats.FindIndex(s => s.Letter == str);
@@ -82,7 +82,7 @@ public class StatisticService
     {
         var stats = new List<LetterStats>();
         var box = string.Empty;
-        
+
         stream.ResetPositionToStart();
         while (!stream.IsEof)
         {
@@ -92,7 +92,7 @@ public class StatisticService
             {
                 continue;
             }
-            
+
             if (ValidateChar(c))
             {
                 box = string.Empty;
@@ -104,7 +104,7 @@ public class StatisticService
             {
                 continue;
             }
-            
+
             var index = stats.FindIndex(s => s.Letter == box);
 
             if (index == -1)
@@ -114,14 +114,14 @@ public class StatisticService
                     Letter = box
                 });
                 stats.Add(newStat);
-                
+
                 box = string.Empty;
                 continue;
             }
-            
+
             var stat = IncStatistic(stats[index]);
             stats[index] = stat;
-            
+
             box = string.Empty;
         }
 
@@ -145,16 +145,41 @@ public class StatisticService
     /// </summary>
     /// <param name="letters">Коллекция со статистиками вхождения букв/пар</param>
     /// <param name="charType">Тип букв для анализа</param>
-    private void RemoveCharStatsByType(IList<LetterStats> letters, CharType charType)
+    public IList<LetterStats> RemoveCharStatsByType(IList<LetterStats> letters, CharType charType)
     {
         // TODO : Удалить статистику по запрошенному типу букв.
         switch (charType)
         {
             case CharType.Consonants:
-                break;
+                const string vowels = "аеёиоуыэюя";
+                return RemoveLetters(letters, vowels, true);
+            
             case CharType.Vowel:
-                break;
+                
+                const string consonants = "бвгджзйклмнпрстфхцчшщьъ";
+                return RemoveLetters(letters, consonants, false);
         }
+
+        return new List<LetterStats>();
+    }
+
+    private IList<LetterStats> RemoveLetters(IList<LetterStats> letters, string lettersDelete, bool removeIfContained)
+    {
+        for (var i = letters.Count - 1; i >= 0; i--)
+        {
+            var letter = letters[i].Letter.ToLower();
+            
+            if (letter.Length > 1)
+            {
+                letter = letter.Substring(1);
+            }
+            if (lettersDelete.Contains(letter) == removeIfContained)
+            {
+                letters.RemoveAt(i);
+            }
+        }
+
+        return letters;
     }
 
     /// <summary>
