@@ -16,7 +16,7 @@ public class StatisticService
         PrintStatistic(singleLetterStats);
         PrintStatistic(doubleLetterStats);
 
-        // TODO : Необжодимо дождаться нажатия клавиши, прежде чем завершать выполнение программы.
+        Console.ReadKey();
     }
 
     /// <summary>
@@ -44,12 +44,7 @@ public class StatisticService
         {
             var c = await stream.ReadNextChar();
             var str = c.ToString();
-
-            if (c == (char) 65533)
-            {
-                continue;
-            }
-
+            
             if (ValidateChar(c)) continue;
 
             var index = stats.FindIndex(s => s.Letter == str);
@@ -87,11 +82,6 @@ public class StatisticService
         while (!stream.IsEof)
         {
             var c = await stream.ReadNextChar();
-
-            if (c == (char) 65533)
-            {
-                continue;
-            }
 
             if (ValidateChar(c))
             {

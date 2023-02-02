@@ -2,8 +2,7 @@
 {
     public class ReadOnlyStream : IReadOnlyStream
     {
-        private readonly Stream _localStream;
-        private int position;
+        private readonly StreamReader _localStream;
 
         /// <summary>
         /// Конструктор класса. 
@@ -14,10 +13,8 @@
         public ReadOnlyStream(string fileFullPath)
         {
             IsEof = true;
-            position = 0;
 
-            _localStream = new FileStream(fileFullPath, FileMode.Open, FileAccess.Read);
-            _localStream.Position = 0;
+            _localStream = new StreamReader(fileFullPath);
         }
 
         /// <summary>
@@ -33,25 +30,20 @@
         /// <returns>Считанный символ.</returns>
         public async Task<char> ReadNextChar()
         {
-            var buffer = new char[1];
-            var charCount = 0;
-
-            _localStream.Seek(position, SeekOrigin.Begin);
-            var reader = new StreamReader(_localStream);
-
-            charCount = await reader.ReadAsync(buffer, 0, 1);
-
-            if (charCount == 1)
-            {
-                position++;
-                return buffer[0] == 65533 ? (char)65533 : buffer[0];
-            }
-
             if (IsEof)
                 throw new Exception("Reached end of file.");
 
-            IsEof = true;
-            return '\0';
+            var buffer = new char[1];
+
+            var result = await _localStream.ReadAsync(buffer, 0, 1);
+
+            if (result == 0)
+            {
+                IsEof = true;
+                return '\0';
+            }
+
+            return buffer[0];
         }
 
         /// <summary>
@@ -65,13 +57,11 @@
                 return;
             }
 
-            _localStream.Position = 0;
             IsEof = false;
         }
 
         public void Close()
         {
-            _localStream.Close();
             _localStream.Dispose();
         }
     }

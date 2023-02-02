@@ -9,6 +9,8 @@ public class ReadOnlyStreamTests
     public async Task CheckSingleFileReturnChar()
     {
         var inputStream = new ReadOnlyStream(FILE_NAME_SINGLE);
+        inputStream.ResetPositionToStart();
+        
         var c = await inputStream.ReadNextChar();
         inputStream.Close();
 
@@ -19,6 +21,8 @@ public class ReadOnlyStreamTests
     public async Task CheckDoubleFileReturnChar()
     {
         var inputStream = new ReadOnlyStream(FILE_NAME_DOUBLE);
+        inputStream.ResetPositionToStart();
+        
         var c = await inputStream.ReadNextChar();
         inputStream.Close();
 
