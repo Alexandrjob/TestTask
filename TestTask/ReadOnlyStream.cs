@@ -56,7 +56,9 @@
                 IsEof = true;
                 return;
             }
-
+            
+            _localStream.DiscardBufferedData();
+            _localStream.BaseStream.Seek(0, SeekOrigin.Begin);
             IsEof = false;
         }
 
